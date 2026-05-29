@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Studio Pipeline</title>
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0F0F12" />
+
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Studio" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0F0F12; --surface: #17171C; --surface-2: #1F1F26; --line: #2A2A33;
+      --ink: #F4F2EC; --muted: #9A968C; --faint: #6A675F;
+      --accent: #E8A33D; --accent-soft: rgba(232,163,61,0.14); --green: #6FBF73;
+      --radius: 18px;
+      --display: "Fraunces", Georgia, "Times New Roman", serif;
+      --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: var(--bg); color: var(--ink); font-family: var(--ui);
+      font-size: 16px; line-height: 1.45;
+      background-image:
+        radial-gradient(120% 80% at 100% -10%, rgba(232,163,61,0.10), transparent 55%),
+        radial-gradient(90% 60% at -10% 110%, rgba(111,191,115,0.06), transparent 50%);
+      background-attachment: fixed;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+               calc(env(safe-area-inset-bottom) + 96px) env(safe-area-inset-left);
+    }
+    .wrap { max-width: 680px; margin: 0 auto; padding: 22px 18px 0; }
+    header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+    .word { font-family: var(--display); font-weight: 600; font-size: 30px; letter-spacing: -0.02em; line-height: 1; }
+    .word em { font-style: italic; color: var(--accent); }
+    .tag { font-size: 12px; color: var(--faint); letter-spacing: 0.14em; text-transform: uppercase; }
+    .sub { color: var(--muted); font-size: 14px; margin: 6px 0 20px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+    .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+    .stat .n { font-family: var(--display); font-size: 26px; font-weight: 600; line-height: 1; }
+    .stat .l { color: var(--muted); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 6px; }
+    .stat.accent .n { color: var(--accent); }
+    .stat.green .n { color: var(--green); }
+    .seclabel { display: flex; align-items: center; gap: 10px; margin: 4px 2px 12px; }
+    .seclabel span { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
+    .seclabel .rule { flex: 1; height: 1px; background: var(--line); }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 12px; animation: rise 0.4s cubic-bezier(0.2,0.8,0.2,1) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .card .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .card h3 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+    .card .topic { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .chip { font-size: 11px; padding: 4px 9px; border-radius: 999px; background: var(--accent-soft);
+      color: var(--accent); white-space: nowrap; font-weight: 600; letter-spacing: 0.02em; }
+    .chip.done { background: rgba(111,191,115,0.16); color: var(--green); }
+    .track { height: 6px; background: var(--surface-2); border-radius: 999px; margin: 14px 0 6px; overflow: hidden; }
+    .fill { height: 100%; background: linear-gradient(90deg, #C9822A, var(--accent)); border-radius: 999px;
+      transition: width 0.45s cubic-bezier(0.2,0.8,0.2,1); }
+    .fill.done { background: linear-gradient(90deg, #4F8F54, var(--green)); }
+    .stagerow { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
+    .stagerow .step { color: var(--ink); font-weight: 600; }
+    .actions { display: flex; gap: 8px; margin-top: 14px; }
+    button { font-family: var(--ui); cursor: pointer; border: none; }
+    .btn { flex: 1; padding: 11px; border-radius: 12px; font-size: 14px; font-weight: 600;
+      background: var(--surface-2); color: var(--ink); border: 1px solid var(--line);
+      transition: transform 0.1s ease, background 0.15s ease; }
+    .btn:active { transform: scale(0.97); }
+    .btn.primary { background: var(--accent); color: #1A1206; border-color: transparent; }
+    .btn.ghost { flex: 0 0 auto; width: 46px; color: var(--muted); }
+    .btn.back { flex: 0 0 auto; width: 46px; }
+    .empty { text-align: center; color: var(--muted); padding: 40px 20px; }
+    .empty .big { font-family: var(--display); font-size: 22px; color: var(--ink); margin-bottom: 6px; }
+    .fab { position: fixed; right: 18px; bottom: calc(env(safe-area-inset-bottom) + 20px);
+      width: 58px; height: 58px; border-radius: 50%; background: var(--accent); color: #1A1206;
+      font-size: 30px; font-weight: 400; line-height: 56px; text-align: center;
+      box-shadow: 0 10px 30px rgba(232,163,61,0.35), 0 2px 8px rgba(0,0,0,0.4); transition: transform 0.12s ease; }
+    .fab:active { transform: scale(0.92); }
+    .scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.55); opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease; z-index: 20; backdrop-filter: blur(2px); }
+    .scrim.show { opacity: 1; pointer-events: auto; }
+    .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--surface);
+      border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 1px solid var(--line);
+      padding: 10px 20px calc(env(safe-area-inset-bottom) + 22px);
+      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2,0.8,0.2,1);
+      max-width: 680px; margin: 0 auto; }
+    .sheet.show { transform: none; }
+    .grab { width: 40px; height: 4px; background: var(--line); border-radius: 999px; margin: 8px auto 16px; }
+    .sheet h2 { font-family: var(--display); font-weight: 600; font-size: 22px; margin: 0 0 16px; }
+    label.fld { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.04em;
+      text-transform: uppercase; margin: 0 0 6px; }
+    input.in { width: 100%; padding: 13px 14px; font-size: 16px; font-family: var(--ui); background: var(--bg);
+      color: var(--ink); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 16px; outline: none; }
+    input.in:focus { border-color: var(--accent); }
+    .sheet .btn.primary { width: 100%; padding: 14px; }
+    .footnote { text-align: center; color: var(--faint); font-size: 11px; margin: 20px 0 8px; }
+    .offline-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+      margin-right: 6px; vertical-align: middle; }
+    .offline .offline-dot { background: var(--faint); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="word">Studio<em>.</em></div>
+      <div class="tag">Pipeline</div>
+    </header>
+    <p class="sub">Lacak konten short-form dari riset sampai tayang.</p>
+
+    <div class="stats">
+      <div class="stat accent"><div class="n" id="stAktif">0</div><div class="l">Sedang Jalan</div></div>
+      <div class="stat"><div class="n" id="stTotal">0</div><div class="l">Total Ide</div></div>
+      <div class="stat green"><div class="n" id="stTayang">0</div><div class="l">Tayang</div></div>
+    </div>
+
+    <div class="seclabel"><span>Antrian Produksi</span><div class="rule"></div></div>
+    <div id="list"></div>
+
+    <p class="footnote"><span class="offline-dot" id="dot"></span><span id="netlabel">Tersimpan di perangkat, jalan offline</span></p>
+  </div>
+
+  <button class="fab" id="fab" aria-label="Tambah ide">+</button>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-label="Tambah ide konten">
+    <div class="grab"></div>
+    <h2>Ide konten baru</h2>
+    <label class="fld" for="judul">Judul / Hook</label>
+    <input class="in" id="judul" placeholder="cth: Kenapa orang pintar sering insecure?" />
+    <label class="fld" for="topik">Topik</label>
+    <input class="in" id="topik" placeholder="cth: Psikologi, Ekonomi, Bisnis" />
+    <button class="btn primary" id="simpan">Tambahkan ke antrian</button>
+  </div>
+
+  <script>
+    const STAGES = ["Riset","Skrip VO","Prompt TTI","Generate Gambar","Prompt ITV","Reorder Galeri","Caption & Hashtag","Tayang"];
+    const LAST = STAGES.length - 1;
+
+    const KEY = "studio.items.v1";
+    let memory = null;
+    function load() {
+      if (memory) return memory;
+      try { const raw = localStorage.getItem(KEY); memory = raw ? JSON.parse(raw) : seed(); }
+      catch (e) { memory = seed(); }
+      return memory;
+    }
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(memory)); } catch (e) {} }
+    function seed() {
+      return [
+        { id: id(), judul: "Kenapa orang pintar sering insecure?", topik: "Psikologi", stage: 2 },
+        { id: id(), judul: "Bisnis yang untung justru saat orang panik", topik: "Ekonomi", stage: 5 },
+        { id: id(), judul: "Pelajaran dari runtuhnya ekonomi Argentina", topik: "Sejarah Ekonomi", stage: 7 }
+      ];
+    }
+    function id() { return Math.random().toString(36).slice(2, 9); }
+
+    const list = document.getElementById("list");
+    function render() {
+      const items = load();
+      const tayang = items.filter(i => i.stage >= LAST).length;
+      const aktif = items.length - tayang;
+      document.getElementById("stAktif").textContent = aktif;
+      document.getElementById("stTotal").textContent = items.length;
+      document.getElementById("stTayang").textContent = tayang;
+
+      if (!items.length) {
+        list.innerHTML = '<div class="empty"><div class="big">Antrian masih kosong</div>Tap tombol + untuk menambahkan ide konten pertamamu.</div>';
+        return;
+      }
+      const order = [...items].sort((a, b) => {
+        const ad = a.stage >= LAST, bd = b.stage >= LAST;
+        if (ad !== bd) return ad ? 1 : -1;
+        return b.stage - a.stage;
+      });
+      list.innerHTML = "";
+      order.forEach((it, idx) => {
+        const done = it.stage >= LAST;
+        const pct = Math.round((it.stage / LAST) * 100);
+        const el = document.createElement("div");
+        el.className = "card";
+        el.style.animationDelay = (idx * 0.04) + "s";
+        el.innerHTML =
+          '<div class="top"><div><h3>' + esc(it.judul) + '</h3>' +
+          '<div class="topic">' + esc(it.topik || "Tanpa topik") + '</div></div>' +
+          '<div class="chip ' + (done ? "done" : "") + '">' + (done ? "Tayang" : "Tahap " + (it.stage + 1)) + '</div></div>' +
+          '<div class="track"><div class="fill ' + (done ? "done" : "") + '" style="width:' + pct + '%"></div></div>' +
+          '<div class="stagerow"><span class="step">' + esc(STAGES[it.stage]) + '</span><span>' + pct + '%</span></div>' +
+          '<div class="actions">' +
+          '<button class="btn back" data-act="back" data-id="' + it.id + '" aria-label="Mundur">&#8592;</button>' +
+          (done
+            ? '<button class="btn" data-act="none" data-id="' + it.id + '">Selesai &#10003;</button>'
+            : '<button class="btn primary" data-act="next" data-id="' + it.id + '">Lanjut ke ' + esc(STAGES[it.stage + 1]) + '</button>') +
+          '<button class="btn ghost" data-act="del" data-id="' + it.id + '" aria-label="Hapus">&#215;</button>' +
+          '</div>';
+        list.appendChild(el);
+      });
+    }
+    function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c])); }
+
+    list.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-act]");
+      if (!btn) return;
+      const items = load();
+      const it = items.find(x => x.id === btn.dataset.id);
+      if (!it) return;
+      const act = btn.dataset.act;
+      if (act === "next" && it.stage < LAST) it.stage++;
+      else if (act === "back" && it.stage > 0) it.stage--;
+      else if (act === "del") memory = items.filter(x => x.id !== it.id);
+      save(); render();
+    });
+
+    const scrim = document.getElementById("scrim");
+    const sheet = document.getElementById("sheet");
+    const judul = document.getElementById("judul");
+    function openSheet() { scrim.classList.add("show"); sheet.classList.add("show"); setTimeout(() => judul.focus(), 250); }
+    function closeSheet() { scrim.classList.remove("show"); sheet.classList.remove("show"); }
+    document.getElementById("fab").addEventListener("click", openSheet);
+    scrim.addEventListener("click", closeSheet);
+    document.getElementById("simpan").addEventListener("click", () => {
+      const j = judul.value.trim();
+      if (!j) { judul.focus(); return; }
+      const t = document.getElementById("topik").value.trim();
+      load().unshift({ id: id(), judul: j, topik: t, stage: 0 });
+      save(); render();
+      judul.value = ""; document.getElementById("topik").value = "";
+      closeSheet();
+    });
+
+    function netStatus() {
+      const off = !navigator.onLine;
+      document.body.classList.toggle("offline", off);
+      document.getElementById("netlabel").textContent = off
+        ? "Mode offline, semua tetap berfungsi"
+        : "Tersimpan di perangkat, jalan offline";
+    }
+    window.addEventListener("online", netStatus);
+    window.addEventListener("offline", netStatus);
+
+    render();
+    netStatus();
+
+    if ("serviceWorker" in navigator &&
+        (location.protocol === "https:" || location.hostname === "localhost")) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
